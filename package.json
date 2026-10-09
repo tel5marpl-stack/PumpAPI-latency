@@ -1,0 +1,11 @@
+{
+  "name": "pumpapi-latency",
+  "version": "1.0.0",
+  "description": "Zero-dependency HTTP(S)/TCP latency probe: DNS, TCP, TLS, TTFB — cold, keep-alive and after idle",
+  "main": "latency.js",
+  "bin": { "pumpapi-latency": "latency.js" },
+  "scripts": { "test": "node test.js" },
+  "engines": { "node": ">=18" },
+  "keywords": ["latency", "ping", "rtt", "ttfb", "tls", "http", "benchmark", "vps"],
+  "license": "MIT"
+}
