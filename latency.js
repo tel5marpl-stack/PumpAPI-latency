@@ -20,30 +20,30 @@ const net = require('net');
 const dns = require('dns');
 const { performance } = require('perf_hooks');
 
-const POMOC = `latency-probe — pomiar latencji HTTP(S)/TCP bez zależności
+const POMOC = `latency-probe — pomiar latencji HTTP(S)/TCP bez zależności / zero-dependency HTTP(S)/TCP latency probe
 
-Użycie:
-  node latency.js <cel> [<cel> ...] [opcje]
+Użycie / Usage:
+  node latency.js <cel/target> [<cel/target> ...] [opcje/options]
 
-Cel:
-  https://host[:port][/ścieżka]   fazy DNS/TCP/TLS/TTFB, połączenie zimne, ciepłe, po bezczynności
-  http://host[:port][/ścieżka]    to samo bez TLS
-  tcp://host:port                 sam TCP connect (zamiennik ping, gdy ICMP jest blokowany)
+Cel / Target:
+  https://host[:port][/ścieżka]   DNS/TCP/TLS/TTFB — połączenie zimne, ciepłe, po bezczynności / cold, keep-alive, after idle
+  http://host[:port][/path]       to samo bez TLS / same without TLS
+  tcp://host:port                 sam TCP connect (zamiennik ping) / TCP connect only (ping replacement)
 
-Opcje:
-  --n <liczba>          próbek na scenariusz (domyślnie 20)
-  --tryb <lista>        cold,warm,idle — które scenariusze (domyślnie cold,warm)
-  --idle <sekundy>      lista przerw dla trybu idle, np. 15,60,180 (domyślnie 15,60)
-  --odstep <ms>         przerwa między próbkami (domyślnie 200)
-  --timeout <ms>        limit jednego żądania (domyślnie 10000)
-  --metoda <GET|HEAD>   metoda HTTP (domyślnie GET)
-  --insecure            nie sprawdzaj certyfikatu TLS
-  --json                wynik jako JSON (do porównań między serwerami)
-  --help                ta pomoc
+Opcje / Options:
+  --n <liczba|number>                 próbek na scenariusz / samples per scenario (20)
+  --tryb, --mode <cold,warm,idle>     scenariusze / scenarios (cold,warm)
+  --idle <s,s,...>                    przerwy dla trybu idle / idle pauses in seconds (15,60)
+  --odstep, --interval <ms>           przerwa między próbkami / delay between samples (200)
+  --timeout <ms>                      limit jednego żądania / per-request timeout (10000)
+  --metoda, --method <GET|HEAD>       metoda HTTP / HTTP method (GET)
+  --insecure                          bez weryfikacji certyfikatu / skip TLS certificate check
+  --json                              wynik jako JSON / JSON output
+  --help                              ta pomoc / this help
 
-Przykłady:
+Przykłady / Examples:
   node latency.js https://example.com
-  node latency.js https://example.com --tryb cold,warm,idle --idle 15,60,180 --n 30
+  node latency.js https://example.com --mode cold,warm,idle --idle 15,60,180 --n 30
   node latency.js tcp://example.com:443 --n 50
   node latency.js https://a.example https://b.example --json > wynik.json
 `;
@@ -55,11 +55,11 @@ function argumenty(argv) {
         const nast = () => { if (i + 1 >= argv.length) throw new Error(`brak wartości dla ${a}`); return argv[++i]; };
         if (a === '--help' || a === '-h') o.pomoc = true;
         else if (a === '--n') o.n = liczba(nast(), a, 1);
-        else if (a === '--tryb') o.tryb = nast().split(',').map((s) => s.trim()).filter(Boolean);
+        else if (a === '--tryb' || a === '--mode') o.tryb = nast().split(',').map((s) => s.trim()).filter(Boolean);
         else if (a === '--idle') o.idle = nast().split(',').map((s) => liczba(s, a, 0));
-        else if (a === '--odstep') o.odstep = liczba(nast(), a, 0);
+        else if (a === '--odstep' || a === '--interval') o.odstep = liczba(nast(), a, 0);
         else if (a === '--timeout') o.timeout = liczba(nast(), a, 1);
-        else if (a === '--metoda') o.metoda = nast().toUpperCase();
+        else if (a === '--metoda' || a === '--method') o.metoda = nast().toUpperCase();
         else if (a === '--insecure') o.insecure = true;
         else if (a === '--json') o.json = true;
         else if (a.startsWith('--')) throw new Error(`nieznana opcja ${a}`);

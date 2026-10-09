@@ -22,6 +22,8 @@ const sprawdz = (c, m) => { assert.ok(c, m); ok++; };
     // argumenty
     const a = argumenty(['https://x.example', '--n', '5', '--tryb', 'cold,idle', '--idle', '1,2', '--json']);
     sprawdz(a.n === 5 && a.tryb.join() === 'cold,idle' && a.idle.join() === '1,2' && a.json, 'argumenty');
+    const en = argumenty(['https://x.example', '--mode', 'warm', '--interval', '50', '--method', 'head']);
+    sprawdz(en.tryb.join() === 'warm' && en.odstep === 50 && en.metoda === 'HEAD', 'angielskie odpowiedniki opcji: --mode, --interval, --method');
     assert.throws(() => argumenty(['--n', '0']), /niepoprawna/); ok++;
     assert.throws(() => argumenty(['--tryb', 'zly']), /nieznany tryb/); ok++;
 
